@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Medicamentos - Farmácia da UBS</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px; /* Espaço no topo */
+            padding-bottom: 20px; /* Espaço na base */
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+        }
+        /* Mantendo seus estilos de status, pois são bem específicos */
+        .status-vencido {
+            color: #dc3545; /* Cor de perigo do Bootstrap */
+            font-weight: bold;
+        }
+        .status-proximo {
+            color: #ffc107; /* Cor de aviso do Bootstrap */
+            font-weight: bold;
+        }
+        .status-ok {
+            color: #198754; /* Cor de sucesso do Bootstrap */
+            font-weight: bold;
+        }
+        .table th {
+            background-color: #e9ecef; /* Um cinza um pouco mais escuro para o cabeçalho da tabela */
+        }
+        /* Para o link "Voltar para Home" se você decidir adicionar um */
+        .home-link {
+            display: inline-block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Lista de Medicamentos</h1>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Voltar para Home</a>
+            {# Ou, se esta página for acessada de outro local sem ser a home,
+               você pode querer um botão para adicionar novo medicamento aqui também:
+            <a href="{% url 'cadastrar_medicamento' %}" class="btn btn-primary">Adicionar Medicamento</a>
+            #}
+        </div>
+
+        {% if medicamentos %}
+            <div class="table-responsive"> {# Para tabelas largas em telas pequenas #}
+                <table class="table table-striped table-hover table-bordered">
+                    <thead class="table-light"> {# Estilo alternativo para o cabeçalho #}
+                        <tr>
+                            <th>Nome</th>
+                            <th>Lote</th>
+                            <th>Validade</th>
+                            <th>Quantidade</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            {# Adicionaria Ações aqui se tivesse links de editar/deletar por item #}
+                            {# <th>Ações</th> #}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for med in medicamentos %}
+                        <tr>
+                            <td>{{ med.nome }}</td>
+                            <td>{{ med.lote|default:"N/A" }}</td> {# Adicionado default se lote puder ser vazio #}
+                            <td>{{ med.validade|date:"d/m/Y" }}</td>
+                            <td>{{ med.quantidade }}</td>
+                            <td>{{ med.get_tipo_display }}</td>
+                            <td>
+                                {% if med.esta_vencido %}
+                                    <span class="status-vencido">Vencido</span>
+                                {% elif med.vencimento_proximo %}
+                                    <span class="status-proximo">Próximo do Vencimento</span>
+                                {% else %}
+                                    <span class="status-ok">OK</span>
+                                {% endif %}
+                            </td>
+                            {# Exemplo de coluna de Ações se necessário #}
+                            {#
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Editar</a>
+                                <a href="#" class="btn btn-sm btn-outline-danger">Excluir</a>
+                            </td>
+                            #}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Nenhum medicamento encontrado.
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>

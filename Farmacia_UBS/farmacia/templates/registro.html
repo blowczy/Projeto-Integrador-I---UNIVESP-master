@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuário - Farmácia da UBS</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+            width: 100%;
+            max-width: 500px; /* Limita a largura do formulário */
+        }
+        /* Não precisamos mais das regras CSS complexas para form p label, etc.,
+           pois vamos aplicar classes Bootstrap diretamente nos elementos. */
+        .form-control.is-invalid { /* Estilo para campos inválidos */
+            border-color: #dc3545;
+        }
+        .invalid-feedback { /* Mensagem de erro do campo */
+            display: block; /* Garante que a mensagem de erro seja mostrada */
+            width: 100%;
+            margin-top: .25rem;
+            font-size: .875em;
+            color: #dc3545;
+        }
+        .form-text { /* Para o help_text */
+            font-size: .875em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2 class="mb-4 text-center">Cadastro de Novo Usuário</h2>
+        <form method="post" action="{% url 'registro' %}">
+            {% csrf_token %}
+
+            {# Renderiza erros não vinculados a campos específicos (non-field errors) #}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <p class="mb-0">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Iterar manualmente pelos campos do formulário para aplicar classes Bootstrap #}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }} {# Renderiza o widget do campo #}
+
+                    {# Adiciona a classe 'is-invalid' se o campo tiver erros #}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="invalid-feedback">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {# Mostra o texto de ajuda (help_text), se houver #}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="d-grid gap-2 mt-4"> {# Aumentei a margem superior do botão #}
+                <button type="submit" class="btn btn-primary btn-lg">Cadastrar</button>
+            </div>
+        </form>
+        <p class="mt-3 text-center">
+            Já tenho conta. <a href="{% url 'login' %}">Fazer login</a>
+        </p>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper (necessário para alguns componentes, mas não crítico aqui) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <script>
+        // Script para adicionar a classe 'form-control' aos inputs e 'is-invalid' se houver erro.
+        // Isso é útil porque o Django não adiciona classes CSS aos widgets por padrão
+        // quando você apenas renderiza {{ field }}.
+        document.addEventListener('DOMContentLoaded', function() {
+            const formFields = document.querySelectorAll('form input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]), form select, form textarea');
+            formFields.forEach(function(field) {
+                field.classList.add('form-control');
+                // Verifica se o div pai (mb-3) contém um div com a classe 'invalid-feedback'
+                if (field.closest('.mb-3').querySelector('.invalid-feedback')) {
+                    field.classList.add('is-invalid');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

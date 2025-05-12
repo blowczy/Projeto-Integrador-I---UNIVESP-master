@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- A tag title é mais simples, o h1 dentro dela não é padrão -->
+    <title>{% if form.instance.pk %}Editar Medicamento{% else %}Cadastrar Medicamento{% endif %} - Farmácia da UBS</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+            width: 100%;
+            max-width: 600px; /* Um pouco maior para formulários com mais campos */
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: .25rem;
+            font-size: .875em;
+            color: #dc3545;
+        }
+        .form-text {
+            font-size: .875em;
+            color: #6c757d;
+        }
+        /* Para inputs do tipo 'date' e 'checkbox' terem uma aparência melhor com Bootstrap */
+        input[type="date"].form-control {
+            /* Bootstrap já lida bem, mas podemos forçar se necessário */
+        }
+        .form-check-input {
+            margin-top: 0.3rem; /* Alinhar melhor com o label */
+        }
+        .form-check-label {
+            margin-left: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2 class="mb-4 text-center">
+            {% if form.instance.pk %}Editar Medicamento{% else %}Cadastrar Medicamento{% endif %}
+        </h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {# Renderiza erros não vinculados a campos específicos (non-field errors) #}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <p class="mb-0">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Iterar manualmente pelos campos do formulário #}
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% else %}
+                    <div class="mb-3">
+                        {# Tratamento especial para campos CheckboxInput #}
+                        {% if field.widget_type == 'checkbox' %}
+                            <div class="form-check">
+                                {{ field }} {# Renderiza o input checkbox #}
+                                <label for="{{ field.id_for_label }}" class="form-check-label">
+                                    {{ field.label }}
+                                </label>
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block"> {# d-block para forçar exibição #}
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted d-block">{{ field.help_text|safe }}</small>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }} {# Renderiza o widget do campo (input, select, textarea) #}
+
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    {% if form.instance.pk %}Atualizar{% else %}Salvar{% endif %}
+                </button>
+            </div>
+        </form>
+        <p class="mt-3 text-center">
+            <a href="{% url 'home' %}">Voltar para a Home</a>
+        </p>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adiciona 'form-control' para inputs, selects, textareas
+            const formControls = document.querySelectorAll(
+                'form input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]), form select, form textarea'
+            );
+            formControls.forEach(function(control) {
+                control.classList.add('form-control');
+                 // Adiciona 'is-invalid' se o campo tem erro
+                if (control.closest('.mb-3').querySelector('.invalid-feedback')) {
+                    control.classList.add('is-invalid');
+                }
+            });
+
+            // Adiciona 'form-check-input' para checkboxes
+            const checkboxes = document.querySelectorAll('form input[type="checkbox"]');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.classList.add('form-check-input');
+                // Adiciona 'is-invalid' se o campo tem erro
+                // Para checkboxes, o erro pode estar no div.form-check pai.
+                if (checkbox.closest('.form-check').querySelector('.invalid-feedback')) {
+                    checkbox.classList.add('is-invalid');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
